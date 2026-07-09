@@ -190,7 +190,7 @@ local function createPanel(side)
                 for _, c in ipairs(sf:GetChildren()) do if c:IsA("TextButton") or c:IsA("Frame") then c:Destroy() end end
                 for _, pl in ipairs(Players:GetPlayers()) do
                     if pl ~= player then
-                        AddBtn(sf, "👤 " .. pl.Name, function() TeleportToPlayer(pl) end)
+                        AddBtn(sf, " " .. pl.Name, function() TeleportToPlayer(pl) end)
                     end
                 end
             end
@@ -215,49 +215,49 @@ local function createPanel(side)
             -- 功能
             local funcLbl = Instance.new("TextLabel")
             funcLbl.Size = UDim2.new(1, 0, 0, 18); funcLbl.BackgroundTransparency = 1
-            funcLbl.Text = "—— ⚙️ 功能 ——"; funcLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
+            funcLbl.Text = "——  功能 ——"; funcLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
             funcLbl.TextSize = 11; funcLbl.Font = Enum.Font.GothamBold; funcLbl.TextXAlignment = Enum.TextXAlignment.Left
             funcLbl.Parent = sf
 
-            AddToggle(sf, "🛸 飞行", false, function(v) if v then StartFly() else StopFly() end end)
-            AddToggle(sf, "🔄 自转", false, function(v) if v then StartSpin() else StopSpin() end end)
-            AddToggle(sf, "🦘 无限跳", false, function(v) ToggleInfJump() end)
-            AddToggle(sf, "🔮 穿墙", false, function(v) ToggleNoClip() end)
-            AddBtn(sf, "⚡ 加速 (" .. State.Speed .. "x)", function() CycleSpeed() end)
+            AddToggle(sf, " 飞行", false, function(v) if v then StartFly() else StopFly() end end)
+            AddToggle(sf, " 自转", false, function(v) if v then StartSpin() else StopSpin() end end)
+            AddToggle(sf, " 无限跳", false, function(v) ToggleInfJump() end)
+            AddToggle(sf, " 穿墙", false, function(v) ToggleNoClip() end)
+            AddBtn(sf, " 加速 (" .. State.Speed .. "x)", function() CycleSpeed() end)
 
             -- 娱乐
             local trollLbl = Instance.new("TextLabel")
             trollLbl.Size = UDim2.new(1, 0, 0, 18); trollLbl.BackgroundTransparency = 1
-            trollLbl.Text = "—— 🎮 娱乐 ——"; trollLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
+            trollLbl.Text = "——  娱乐 ——"; trollLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
             trollLbl.TextSize = 11; trollLbl.Font = Enum.Font.GothamBold; trollLbl.TextXAlignment = Enum.TextXAlignment.Left
             trollLbl.Parent = sf
 
-            AddBtn(sf, "🌀 绕圈", function() if State.Circling then StopCircle() elseif GetTarget() then StartCircle(GetTarget()) end end)
-            AddBtn(sf, "🙌 举手", function() TrollHandsUp(GetTarget()) end)
-            AddBtn(sf, "😵 摔倒", function() TrollSit(GetTarget()) end)
-            AddBtn(sf, "❄️ 冻结", function() TrollFreeze(GetTarget()) end)
-            AddBtn(sf, "🚀 弹飞", function() TrollFling(GetTarget()) end)
-            AddBtn(sf, "🔄 转圈", function() TrollSpin(GetTarget()) end)
-            AddBtn(sf, "🙃 倒立", function() TrollFlip(GetTarget()) end)
-            AddBtn(sf, "♻️ 恢复", function() ClearTroll() end)
+            AddBtn(sf, " 绕圈", function() if State.Circling then StopCircle() elseif GetTarget() then StartCircle(GetTarget()) end end)
+            AddBtn(sf, " 举手", function() TrollHandsUp(GetTarget()) end)
+            AddBtn(sf, " 摔倒", function() TrollSit(GetTarget()) end)
+            AddBtn(sf, " 冻结", function() TrollFreeze(GetTarget()) end)
+            AddBtn(sf, " 弹飞", function() TrollFling(GetTarget()) end)
+            AddBtn(sf, " 转圈", function() TrollSpin(GetTarget()) end)
+            AddBtn(sf, " 倒立", function() TrollFlip(GetTarget()) end)
+            AddBtn(sf, " 恢复", function() ClearTroll() end)
 
             -- 战斗
             local combatLbl = Instance.new("TextLabel")
             combatLbl.Size = UDim2.new(1, 0, 0, 18); combatLbl.BackgroundTransparency = 1
-            combatLbl.Text = "—— ⚔️ 战斗 ——"; combatLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
+            combatLbl.Text = "——  战斗 ——"; combatLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
             combatLbl.TextSize = 11; combatLbl.Font = Enum.Font.GothamBold; combatLbl.TextXAlignment = Enum.TextXAlignment.Left
             combatLbl.Parent = sf
 
-            AddToggle(sf, "🎯 自瞄", false, function(v) ToggleAimbot() end)
-            AddToggle(sf, "👀 可视检查", false, function(v) State.AimbotVisible = v end)
-            AddToggle(sf, "💥 范围伤害", false, function(v) ToggleHitbox() end)
+            AddToggle(sf, " 自瞄", false, function(v) ToggleAimbot() end)
+            AddToggle(sf, " 可视检查（建议开）", false, function(v) State.AimbotVisible = v end)
+            AddToggle(sf, " 范围伤害", false, function(v) ToggleHitbox() end)
             AddBtn(sf, "🔺 范围+", function() State.HitboxSize = math.min(State.HitboxSize+1, 20); if State.Hitbox then ToggleHitbox(); ToggleHitbox() end end)
             AddBtn(sf, "🔻 范围-", function() State.HitboxSize = math.max(State.HitboxSize-1, 2); if State.Hitbox then ToggleHitbox(); ToggleHitbox() end end)
 
             -- 其他
             local otherLbl = Instance.new("TextLabel")
             otherLbl.Size = UDim2.new(1, 0, 0, 18); otherLbl.BackgroundTransparency = 1
-            otherLbl.Text = "—— 📌 其他 ——"; otherLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
+            otherLbl.Text = "——  其他 ——"; otherLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
             otherLbl.TextSize = 11; otherLbl.Font = Enum.Font.GothamBold; otherLbl.TextXAlignment = Enum.TextXAlignment.Left
             otherLbl.Parent = sf
 
