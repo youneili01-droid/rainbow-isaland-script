@@ -211,7 +211,7 @@ local function CreatePanel(side)
                 for _, c in ipairs(content:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
                 for _, pl in ipairs(Players:GetPlayers()) do
                     if pl ~= LocalPlayer then
-                        AddBtn(content, "👤 " .. pl.Name, function() TeleportToPlayer(pl) end)
+                        AddBtn(content, " " .. pl.Name, function() TeleportToPlayer(pl) end)
                     end
                 end
             end
@@ -244,11 +244,11 @@ local function CreatePanel(side)
             funcLabel.TextSize = 11; funcLabel.Font = Enum.Font.GothamBold
             funcLabel.Parent = content
 
-            AddToggle(content, "🛸 飞行 (WASD/Space/Ctrl)", false, function(v) if v then StartFly() else StopFly() end end)
-            AddToggle(content, "🔄 自转", false, function(v) if v then StartSpin() else StopSpin() end end)
-            AddToggle(content, "🦘 无限跳跃", false, function(v) ToggleInfJump() end)
-            AddToggle(content, "🔮 穿墙", false, function(v) ToggleNoClip() end)
-            AddBtn(content, "⚡ 加速 (" .. State.Speed .. "x)", function() CycleSpeed() end)
+            AddToggle(content, "飞行 (WASD/Space/Ctrl)", false, function(v) if v then StartFly() else StopFly() end end)
+            AddToggle(content, "自转", false, function(v) if v then StartSpin() else StopSpin() end end)
+            AddToggle(content, "无限跳跃", false, function(v) ToggleInfJump() end)
+            AddToggle(content, "穿墙", false, function(v) ToggleNoClip() end)
+            AddBtn(content, "加速 (" .. State.Speed .. "x)", function() CycleSpeed() end)
 
             -- 娱乐
             local trollLabel = Instance.new("TextLabel")
@@ -259,14 +259,14 @@ local function CreatePanel(side)
             trollLabel.TextSize = 11; trollLabel.Font = Enum.Font.GothamBold
             trollLabel.Parent = content
 
-            AddBtn(content, "🌀 绕圈", function() if State.Circling then StopCircle() elseif GetTarget() then StartCircle(GetTarget()) end end)
-            AddBtn(content, "🙌 举手", function() TrollHandsUp(GetTarget()) end)
-            AddBtn(content, "😵 摔倒", function() TrollSit(GetTarget()) end)
-            AddBtn(content, "❄️ 冻结", function() TrollFreeze(GetTarget()) end)
-            AddBtn(content, "🚀 弹飞", function() TrollFling(GetTarget()) end)
-            AddBtn(content, "🔄 转圈", function() TrollSpin(GetTarget()) end)
-            AddBtn(content, "🙃 倒立", function() TrollFlip(GetTarget()) end)
-            AddBtn(content, "♻️ 恢复", function() ClearTroll() end)
+            AddBtn(content, " 绕圈", function() if State.Circling then StopCircle() elseif GetTarget() then StartCircle(GetTarget()) end end)
+            AddBtn(content, " 举手", function() TrollHandsUp(GetTarget()) end)
+            AddBtn(content, " 摔倒", function() TrollSit(GetTarget()) end)
+            AddBtn(content, " 冻结", function() TrollFreeze(GetTarget()) end)
+            AddBtn(content, " 弹飞", function() TrollFling(GetTarget()) end)
+            AddBtn(content, " 转圈", function() TrollSpin(GetTarget()) end)
+            AddBtn(content, " 倒立", function() TrollFlip(GetTarget()) end)
+            AddBtn(content, " 恢复", function() ClearTroll() end)
 
             -- 战斗
             local combatLabel = Instance.new("TextLabel")
@@ -277,9 +277,9 @@ local function CreatePanel(side)
             combatLabel.TextSize = 11; combatLabel.Font = Enum.Font.GothamBold
             combatLabel.Parent = content
 
-            AddToggle(content, "🎯 自瞄", false, function(v) ToggleAimbot() end)
-            AddToggle(content, "👀 可视检查", false, function(v) State.AimbotVisible = v end)
-            AddToggle(content, "💥 范围伤害", false, function(v) ToggleHitbox() end)
+            AddToggle(content, " 自瞄", false, function(v) ToggleAimbot() end)
+            AddToggle(content, " 可视检查", false, function(v) State.AimbotVisible = v end)
+            AddToggle(content, " 范围伤害", false, function(v) ToggleHitbox() end)
             AddBtn(content, "🔺 范围+", function() State.HitboxSize = math.min(State.HitboxSize+1, 20); if State.Hitbox then ToggleHitbox(); ToggleHitbox() end end)
             AddBtn(content, "🔻 范围-", function() State.HitboxSize = math.max(State.HitboxSize-1, 2); if State.Hitbox then ToggleHitbox(); ToggleHitbox() end end)
 
@@ -293,7 +293,7 @@ local function CreatePanel(side)
             otherLabel.Parent = content
 
             AddBtn(content, "⏹ 停止全部", function() StopAll() end)
-            AddBtn(content, "📋 复制QQ群: 1051933529", function() if setclipboard then setclipboard("1051933529") end end)
+            AddBtn(content, " 复制QQ群: 1051933529", function() if setclipboard then setclipboard("1051933529") end end)
         end
     end
     return p
