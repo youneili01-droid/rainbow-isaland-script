@@ -1,5 +1,5 @@
 -- ============================================
--- 3D霓虹正方体 - 屏幕绘制版（ESP风格）
+-- 3D霓虹正方体 - 屏幕绘制版（跟随视角）
 -- ============================================
 
 local RunService = game:GetService("RunService")
@@ -9,7 +9,7 @@ local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
 -- 正方体参数
-local cubeSize = 2
+local cubeSize = 2.5
 local halfSize = cubeSize / 2
 
 -- 8个顶点
@@ -52,17 +52,17 @@ SplashScreen.DisplayOrder = 999
 
 local titleLabel = Instance.new("TextLabel")
 titleLabel.Size = UDim2.new(1, 0, 0, 36)
-titleLabel.Position = UDim2.new(0, 0, 0.75, 0)
+titleLabel.Position = UDim2.new(0, 0, 0.78, 0)
 titleLabel.BackgroundTransparency = 1
-titleLabel.Text = "新项目"
+titleLabel.Text = "加载中..."
 titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-titleLabel.TextSize = 26
+titleLabel.TextSize = 24
 titleLabel.Font = Enum.Font.GothamBlack
 titleLabel.Parent = SplashScreen
 
 local loadBarBg = Instance.new("Frame")
 loadBarBg.Size = UDim2.new(0, 180, 0, 3)
-loadBarBg.Position = UDim2.new(0.5, -90, 0.86, 0)
+loadBarBg.Position = UDim2.new(0.5, -90, 0.88, 0)
 loadBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
 loadBarBg.BorderSizePixel = 0
 loadBarBg.Parent = SplashScreen
@@ -80,7 +80,6 @@ local hue = 0
 local angleX = 0
 local angleY = 0
 local loadProgress = 0
-local centerPos = Vector3.new(0, 0, 5)  -- 正方体在屏幕前方
 
 local function rotateX(pos, angle)
     local c, s = math.cos(angle), math.sin(angle)
@@ -102,18 +101,25 @@ local connection = RunService.RenderStepped:Connect(function(dt)
     loadBar.Size = UDim2.new(loadProgress, 0, 1, 0)
     loadBar.BackgroundColor3 = col
     
+    -- 正方体放在屏幕正前方，用世界坐标计算
+    local viewportSize = Camera.ViewportSize
+    local screenCenter = Vector2.new(viewportSize.X / 2, viewportSize.Y / 2)
+    
+    -- 在相机前方8个单位处放置正方体
+    local cubeCenter = Camera.CFrame.Position + Camera.CFrame.LookVector * 8
+    
     -- 计算旋转后顶点，投影到屏幕
     local sv = {}
     for i, v in ipairs(vertices) do
         local p = rotateX(v, angleX)
         p = rotateY(p, angleY)
-        -- 放到相机前方
-        local worldPos = Camera.CFrame.Position + Camera.CFrame.LookVector * 5 + Camera.CFrame.RightVector * p.X + Camera.CFrame.UpVector * p.Y + Camera.CFrame.LookVector * (-p.Z)
+        -- 转换到世界坐标（基于相机朝向）
+        local worldPos = cubeCenter + Camera.CFrame.RightVector * p.X + Camera.CFrame.UpVector * p.Y - Camera.CFrame.LookVector * p.Z
         local screenPos, onScreen = Camera:WorldToViewportPoint(worldPos)
         sv[i] = screenPos
     end
     
-    -- 更新线条
+    -- 更新线条，让正方体在屏幕中心显示
     for j, edge in ipairs(edges) do
         local p1 = sv[edge[1]]
         local p2 = sv[edge[2]]
@@ -121,12 +127,20 @@ local connection = RunService.RenderStepped:Connect(function(dt)
         lines[j].To = Vector2.new(p2.X, p2.Y)
         lines[j].Color = col
     end
+    
+    -- 标题随颜色变化
+    if loadProgress < 0.3 then titleLabel.Text = "加载中..."
+    elseif loadProgress < 0.6 then titleLabel.Text = "初始化..."
+    elseif loadProgress < 0.9 then titleLabel.Text = "渲染中..."
+    else titleLabel.Text = "即将完成" end
 end)
 
 task.wait(3)
+loadBar.Size = UDim2.new(1, 0, 1, 0)
+task.wait(0.5)
 connection:Disconnect()
 
--- 清理
+-- 淡出
 for _, line in ipairs(lines) do line:Remove() end
 SplashScreen:Destroy()
-print("3D霓虹正方体 屏幕绘制 完成!")
+print("3D霓虹正方体 完成!")
