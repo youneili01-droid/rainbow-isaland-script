@@ -201,7 +201,7 @@ local function createPanel(side)
             -- ESP
             local espLbl = Instance.new("TextLabel")
             espLbl.Size = UDim2.new(1, 0, 0, 18); espLbl.BackgroundTransparency = 1
-            espLbl.Text = "—— 👁️ ESP ——"; espLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
+            espLbl.Text = "——  ESP ——"; espLbl.TextColor3 = Color3.fromRGB(150, 180, 220)
             espLbl.TextSize = 11; espLbl.Font = Enum.Font.GothamBold; espLbl.TextXAlignment = Enum.TextXAlignment.Left
             espLbl.Parent = sf
 
@@ -262,7 +262,7 @@ local function createPanel(side)
             otherLbl.Parent = sf
 
             AddBtn(sf, "⏹ 停止全部", function() StopAll() end)
-            AddBtn(sf, "📋 QQ群: 1051933529", function() if setclipboard then setclipboard("1051933529") end end)
+            AddBtn(sf, " QQ群: 1051933529", function() if setclipboard then setclipboard("1051933529") end end)
         end
 
         -- 收起按钮
