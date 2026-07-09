@@ -1,5 +1,6 @@
 -- ============================================
--- 3D霓虹发光正方体 - 终极版 + 圆角容器背景
+-- Rainbow Island - 调整版
+-- 正方体小+上移 | 进度条下移 | 字下移 | 卡密深色
 -- ============================================
 
 local RunService = game:GetService("RunService")
@@ -7,274 +8,239 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
-local UserInputService = game:GetService("UserInputService")
 
--- 隐藏鼠标
-UserInputService.MouseBehavior = Enum.MouseBehavior.LockCenter
-
--- 全屏深色背景
-local bg = Drawing.new("Square")
-bg.Visible = true
-bg.Filled = true
-bg.Color = Color3.fromRGB(5, 5, 12)
-bg.Size = Vector2.new(5000, 5000)
-bg.Position = Vector2.new(-1000, -1000)
-
--- ==================== 圆角容器背景 ====================
-local container = Instance.new("ScreenGui")
-container.Name = "SplashContainer"
-container.Parent = LocalPlayer:WaitForChild("PlayerGui")
-container.ResetOnSpawn = false
-container.DisplayOrder = 998
-
--- 外层发光
-local containerGlow = Instance.new("Frame")
-containerGlow.Size = UDim2.new(0, 480, 0, 280)
-containerGlow.Position = UDim2.new(0.5, -240, 0.5, -140)
-containerGlow.BackgroundColor3 = Color3.fromRGB(15, 15, 30)
-containerGlow.BackgroundTransparency = 0.2
-containerGlow.BorderSizePixel = 0
-containerGlow.Parent = container
-Instance.new("UICorner", containerGlow).CornerRadius = UDim.new(0, 24)
-
--- 发光边框
-local containerStroke = Instance.new("UIStroke")
-containerStroke.Color = Color3.fromRGB(80, 120, 255)
-containerStroke.Thickness = 1.5
-containerStroke.Transparency = 0.5
-containerStroke.Parent = containerGlow
-
--- 内层
-local containerInner = Instance.new("Frame")
-containerInner.Size = UDim2.new(1, -8, 1, -8)
-containerInner.Position = UDim2.new(0, 4, 0, 4)
-containerInner.BackgroundColor3 = Color3.fromRGB(10, 10, 22)
-containerInner.BackgroundTransparency = 0.15
-containerInner.BorderSizePixel = 0
-containerInner.Parent = containerGlow
-Instance.new("UICorner", containerInner).CornerRadius = UDim.new(0, 20)
-
--- 顶部标题栏
-local topBar = Instance.new("Frame")
-topBar.Size = UDim2.new(1, 0, 0, 40)
-topBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-topBar.BackgroundTransparency = 0.92
-topBar.BorderSizePixel = 0
-topBar.Parent = containerInner
-Instance.new("UICorner", topBar).CornerRadius = UDim.new(0, 20)
-
-local topTitle = Instance.new("TextLabel")
-topTitle.Size = UDim2.new(1, -20, 1, 0)
-topTitle.Position = UDim2.new(0, 10, 0, 0)
-topTitle.BackgroundTransparency = 1
-topTitle.Text = "YOUR PROJECT"
-topTitle.TextColor3 = Color3.fromRGB(200, 210, 255)
-topTitle.TextSize = 14
-topTitle.Font = Enum.Font.GothamBold
-topTitle.TextXAlignment = Enum.TextXAlignment.Left
-topTitle.Parent = topBar
-
--- 版本号
-local versionLabel = Instance.new("TextLabel")
-versionLabel.Size = UDim2.new(0, 60, 1, 0)
-versionLabel.Position = UDim2.new(1, -70, 0, 0)
-versionLabel.BackgroundTransparency = 1
-versionLabel.Text = "v1.0"
-versionLabel.TextColor3 = Color3.fromRGB(120, 140, 200)
-versionLabel.TextSize = 11
-versionLabel.Font = Enum.Font.GothamMedium
-versionLabel.TextXAlignment = Enum.TextXAlignment.Right
-versionLabel.Parent = topBar
-
--- 底部状态栏
-local bottomBar = Instance.new("Frame")
-bottomBar.Size = UDim2.new(1, 0, 0, 32)
-bottomBar.Position = UDim2.new(0, 0, 1, -32)
-bottomBar.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
-bottomBar.BackgroundTransparency = 0.92
-bottomBar.BorderSizePixel = 0
-bottomBar.Parent = containerInner
-
-local statusLabel = Instance.new("TextLabel")
-statusLabel.Size = UDim2.new(1, -20, 1, 0)
-statusLabel.Position = UDim2.new(0, 10, 0, 0)
-statusLabel.BackgroundTransparency = 1
-statusLabel.Text = "LOADING..."
-statusLabel.TextColor3 = Color3.fromRGB(150, 170, 220)
-statusLabel.TextSize = 12
-statusLabel.Font = Enum.Font.GothamMedium
-statusLabel.TextXAlignment = Enum.TextXAlignment.Left
-statusLabel.Parent = bottomBar
-
--- ==================== 正方体参数 ====================
-local cubeSize = 2.5
-local halfSize = cubeSize / 2
+-- ==================== 3D立方体 - 变小 ====================
+local cubeSize = 1.4
+local half = cubeSize / 2
 
 local vertices = {
-    {x = -halfSize, y = -halfSize, z = -halfSize},
-    {x =  halfSize, y = -halfSize, z = -halfSize},
-    {x =  halfSize, y =  halfSize, z = -halfSize},
-    {x = -halfSize, y =  halfSize, z = -halfSize},
-    {x = -halfSize, y = -halfSize, z =  halfSize},
-    {x =  halfSize, y = -halfSize, z =  halfSize},
-    {x =  halfSize, y =  halfSize, z =  halfSize},
-    {x = -halfSize, y =  halfSize, z =  halfSize},
+    Vector3.new(-half, -half, -half), Vector3.new(half, -half, -half),
+    Vector3.new(half, half, -half),   Vector3.new(-half, half, -half),
+    Vector3.new(-half, -half, half),  Vector3.new(half, -half, half),
+    Vector3.new(half, half, half),    Vector3.new(-half, half, half)
 }
 
-local edges = {
-    {1, 2}, {2, 3}, {3, 4}, {4, 1},
-    {5, 6}, {6, 7}, {7, 8}, {8, 5},
-    {1, 5}, {2, 6}, {3, 7}, {4, 8},
-}
+local edges = {{1,2},{2,3},{3,4},{4,1},{5,6},{6,7},{7,8},{8,5},{1,5},{2,6},{3,7},{4,8}}
 
--- 三层线条
-local outerGlows, midGlows, coreLines = {}, {}, {}
+local layers = {glow1={}, glow2={}, glow3={}, glow4={}, core={}}
 for i = 1, 12 do
-    local outer = Drawing.new("Line")
-    outer.Visible = true; outer.Thickness = 14; outer.Transparency = 0.8
-    table.insert(outerGlows, outer)
-    local mid = Drawing.new("Line")
-    mid.Visible = true; mid.Thickness = 7; mid.Transparency = 0.5
-    table.insert(midGlows, mid)
-    local core = Drawing.new("Line")
-    core.Visible = true; core.Color = Color3.fromRGB(255, 255, 255); core.Thickness = 2.5; core.Transparency = 0
-    table.insert(coreLines, core)
-end
-
--- 顶点球
-local vertexDots = {}
-for i = 1, 8 do
-    local dot = Drawing.new("Circle")
-    dot.Visible = true; dot.Filled = true; dot.Radius = 5; dot.Color = Color3.fromRGB(255, 255, 255)
-    table.insert(vertexDots, dot)
-    local dotGlow = Drawing.new("Circle")
-    dotGlow.Visible = true; dotGlow.Filled = true; dotGlow.Radius = 12; dotGlow.Transparency = 0.7
-    table.insert(vertexDots, dotGlow)
-end
-
--- 背景粒子
-local bgParticles = {}
-for i = 1, 40 do
-    local p = Drawing.new("Circle")
-    p.Visible = true; p.Filled = true; p.Radius = math.random(1, 2)
-    p.Position = Vector2.new(math.random(0, 2000), math.random(0, 2000))
-    p.Color = Color3.fromRGB(60 + math.random(0, 30), 60 + math.random(0, 30), 90 + math.random(0, 40))
-    p.Transparency = 0.3 + math.random() * 0.5
-    table.insert(bgParticles, {dot = p, speed = 0.15 + math.random() * 0.5, x = math.random(0, 2000), y = math.random(0, 2000)})
-end
-
--- 动画
-local hue = 0
-local angleX = 0
-local angleY = 0
-local loadProgress = 0
-local time = 0
-
-local function rotateX(p, angle)
-    local c, s = math.cos(angle), math.sin(angle)
-    return {x = p.x, y = p.y * c - p.z * s, z = p.y * s + p.z * c}
-end
-
-local function rotateY(p, angle)
-    local c, s = math.cos(angle), math.sin(angle)
-    return {x = p.x * c + p.z * s, y = p.y, z = -p.x * s + p.z * c}
-end
-
-local connection = RunService.RenderStepped:Connect(function(dt)
-    time = time + dt
-    angleX = angleX + 0.015
-    angleY = angleY + 0.015 * 0.7
-    hue = (hue + 0.5) % 360
-    local col = Color3.fromHSV(hue / 360, 1, 1)
-    
-    loadProgress = math.min(loadProgress + dt * 0.25, 1)
-    
-    -- 状态文字
-    if loadProgress < 0.3 then statusLabel.Text = "INITIALIZING..."
-    elseif loadProgress < 0.6 then statusLabel.Text = "LOADING ASSETS..."
-    elseif loadProgress < 0.9 then statusLabel.Text = "RENDERING..."
-    else statusLabel.Text = "READY" end
-    
-    -- 容器边框颜色
-    containerStroke.Color = col
-    
-    local vw = Camera.ViewportSize.X
-    local vh = Camera.ViewportSize.Y
-    
-    -- 计算屏幕坐标
-    local screenPoints = {}
-    local scale = math.min(vw, vh) * 0.22
-    local cx = vw / 2
-    local cy = vh / 2 - 10
-    
-    for i, v in ipairs(vertices) do
-        local p = rotateX(v, angleX)
-        p = rotateY(p, angleY)
-        local distance = 5
-        local perspective = distance / (distance - p.z)
-        screenPoints[i] = {
-            x = cx + p.x * scale * perspective,
-            y = cy + p.y * scale * perspective
-        }
+    for layerName, thickness in pairs({glow1=18, glow2=11, glow3=6, glow4=3, core=1.5}) do
+        local line = Drawing.new("Line")
+        line.Visible = true
+        line.Thickness = thickness
+        line.Transparency = 1
+        table.insert(layers[layerName], line)
     end
-    
-    -- 更新线条
-    for j, edge in ipairs(edges) do
-        local p1 = screenPoints[edge[1]]
-        local p2 = screenPoints[edge[2]]
-        outerGlows[j].From = Vector2.new(p1.x, p1.y); outerGlows[j].To = Vector2.new(p2.x, p2.y); outerGlows[j].Color = col
-        midGlows[j].From = Vector2.new(p1.x, p1.y); midGlows[j].To = Vector2.new(p2.x, p2.y); midGlows[j].Color = col
-        coreLines[j].From = Vector2.new(p1.x, p1.y); coreLines[j].To = Vector2.new(p2.x, p2.y)
+end
+
+-- ==================== 星星粒子 ====================
+local stars = {}
+for i = 1, 1000 do
+    local s = Drawing.new("Circle")
+    s.Filled = true
+    s.Radius = math.random(1, 3)
+    s.Transparency = 0.5
+    s.Color = Color3.fromHSV(math.random(), 0.8, 1)
+    table.insert(stars, {
+        obj = s,
+        x = math.random(0, Camera.ViewportSize.X),
+        y = math.random(-100, Camera.ViewportSize.Y),
+        vx = math.random(-0.4, 0.4),
+        vy = -0.6 - math.random() * 1.5,
+        twinkle = math.random() * 6.28,
+        baseRadius = s.Radius
+    })
+end
+
+-- ==================== 进度条（纯Drawing） ====================
+local progBg = Drawing.new("Square")
+progBg.Visible = true; progBg.Filled = true
+progBg.Color = Color3.fromRGB(20, 20, 38)
+progBg.Size = Vector2.new(280, 4)
+progBg.Transparency = 1
+
+local progFill = Drawing.new("Square")
+progFill.Visible = true; progFill.Filled = true
+progFill.Color = Color3.fromRGB(90, 160, 255)
+progFill.Size = Vector2.new(0, 4)
+progFill.Transparency = 0
+
+local progText = Drawing.new("Text")
+progText.Visible = true; progText.Text = ""
+progText.Size = 13; progText.Color = Color3.fromRGB(180, 200, 255)
+progText.Center = true; progText.Font = 3; progText.Transparency = 1
+
+local statusText = Drawing.new("Text")
+statusText.Visible = true; statusText.Text = ""
+statusText.Size = 12; statusText.Color = Color3.fromRGB(140, 170, 240)
+statusText.Center = true; statusText.Font = 2; statusText.Transparency = 1
+
+local bigTitle = Drawing.new("Text")
+bigTitle.Visible = true; bigTitle.Text = "RAINBOW ISLAND"
+bigTitle.Size = 38; bigTitle.Color = Color3.fromRGB(255, 255, 255)
+bigTitle.Center = true; bigTitle.Font = 3; bigTitle.Transparency = 1
+
+-- ==================== 动画 ====================
+local time = 0; local hue = 0
+local phase = 0; local phaseTimer = 0; local progress = 0
+
+local function project3D(point)
+    local rotX = CFrame.fromEulerAnglesXYZ(time * 0.7, 0, 0)
+    local rotY = CFrame.fromEulerAnglesXYZ(0, time * 0.9, 0)
+    local p = rotY * rotX * point
+    local dist = 6.5
+    local scale = math.min(Camera.ViewportSize.X, Camera.ViewportSize.Y) * 0.16
+    local cx, cy = Camera.ViewportSize.X/2, Camera.ViewportSize.Y/2 - 80
+    local persp = dist / (dist - p.Z)
+    return Vector2.new(cx + p.X * scale * persp, cy + p.Y * scale * persp)
+end
+
+local connection
+connection = RunService.RenderStepped:Connect(function(dt)
+    time = time + dt; phaseTimer = phaseTimer + dt
+    hue = (hue + 0.35) % 360
+    local col = Color3.fromHSV(hue/360, 1, 1)
+    local vw = Camera.ViewportSize.X; local vh = Camera.ViewportSize.Y
+
+    if phase == 0 and phaseTimer > 1.0 then phase = 1; phaseTimer = 0 end
+    if phase == 1 and phaseTimer > 2.5 then phase = 2 end
+
+    if phase >= 2 then
+        progress = math.min(phaseTimer / 3.0, 1)
+        progFill.Size = Vector2.new(280 * progress, 4)
+        progFill.Color = col
+        progText.Text = math.floor(progress * 100) .. "%"
+        progText.Transparency = 0
+        statusText.Text = progress >= 0.92 and "READY" or "LOADING..."
+        statusText.Transparency = 0
+        if progress >= 1 and phaseTimer > 3.5 then phase = 3 end
     end
+
+    -- 位置调整：进度条下移，字下移
+    progBg.Position = Vector2.new(vw/2 - 140, vh * 0.82)
+    progFill.Position = Vector2.new(vw/2 - 140, vh * 0.82)
+    progBg.Transparency = (phase >= 2) and 0 or 1
+    progText.Position = Vector2.new(vw/2, vh * 0.78)
+    statusText.Position = Vector2.new(vw/2, vh * 0.87)
+    bigTitle.Position = Vector2.new(vw/2, vh * 0.70)
     
-    for i = 1, 8 do
-        local pos = screenPoints[i]
-        vertexDots[(i-1)*2 + 1].Position = Vector2.new(pos.x, pos.y)
-        vertexDots[(i-1)*2 + 1].Color = col
-        vertexDots[(i-1)*2 + 2].Position = Vector2.new(pos.x, pos.y)
-        vertexDots[(i-1)*2 + 2].Color = col
+    if phase >= 1 then bigTitle.Transparency = math.max(0, bigTitle.Transparency - dt * 1.5) end
+
+    local points = {}
+    for _, v in ipairs(vertices) do table.insert(points, project3D(v)) end
+    for i, edge in ipairs(edges) do
+        local p1 = points[edge[1]]; local p2 = points[edge[2]]
+        layers.glow1[i].From = p1; layers.glow1[i].To = p2; layers.glow1[i].Color = col; layers.glow1[i].Transparency = 0.85
+        layers.glow2[i].From = p1; layers.glow2[i].To = p2; layers.glow2[i].Color = col; layers.glow2[i].Transparency = 0.7
+        layers.glow3[i].From = p1; layers.glow3[i].To = p2; layers.glow3[i].Color = col; layers.glow3[i].Transparency = 0.5
+        layers.glow4[i].From = p1; layers.glow4[i].To = p2; layers.glow4[i].Color = col; layers.glow4[i].Transparency = 0.25
+        layers.core[i].From = p1; layers.core[i].To = p2; layers.core[i].Color = Color3.new(1,1,1); layers.core[i].Transparency = 0
     end
-    
-    for _, p in ipairs(bgParticles) do
-        p.y = p.y - p.speed
-        if p.y < -10 then p.y = vh + 10; p.x = math.random(0, vw) end
-        p.dot.Position = Vector2.new(p.x, p.y)
-        p.dot.Transparency = 0.3 + math.sin(time * 2 + p.x * 0.01) * 0.3
+
+    for _, s in ipairs(stars) do
+        s.x = s.x + s.vx; s.y = s.y + s.vy; s.twinkle = s.twinkle + 0.06
+        if s.y < -50 then s.y = vh + 50; s.x = math.random(0, vw) end
+        s.obj.Position = Vector2.new(s.x, s.y)
+        s.obj.Transparency = 0.2 + math.sin(s.twinkle) * 0.4
+        s.obj.Color = col
+        s.obj.Radius = s.baseRadius + math.sin(s.twinkle * 1.8) * 1.0
+    end
+
+    if phase == 3 then
+        local fade = dt * 2.5
+        bigTitle.Transparency = math.min(1, bigTitle.Transparency + fade)
+        statusText.Transparency = math.min(1, statusText.Transparency + fade)
+        progText.Transparency = math.min(1, progText.Transparency + fade)
+        progBg.Transparency = math.min(1, progBg.Transparency + fade)
+        progFill.Transparency = math.min(1, progFill.Transparency + fade)
+        for _, layer in pairs(layers) do for _, line in ipairs(layer) do line.Transparency = math.min(1, line.Transparency + fade * 1.2) end end
+        for _, s in ipairs(stars) do s.obj.Transparency = math.min(1, s.obj.Transparency + fade * 1.5) end
+        if bigTitle.Transparency >= 1 then
+            connection:Disconnect()
+            for _, layer in pairs(layers) do for _, line in ipairs(layer) do line:Remove() end end
+            for _, s in ipairs(stars) do s.obj:Remove() end
+            progBg:Remove(); progFill:Remove(); progText:Remove(); statusText:Remove(); bigTitle:Remove()
+        end
     end
 end)
 
-task.wait(3.5)
-connection:Disconnect()
+-- ==================== 卡密弹窗（深色，非白色） ====================
+local function ShowPremiumKeyWindow(callback)
+    local keyGui = Instance.new("ScreenGui")
+    keyGui.ResetOnSpawn = false; keyGui.DisplayOrder = 1001
+    keyGui.Parent = LocalPlayer.PlayerGui
 
--- 淡出
-local fadeOut = 0
-local fadeConn = RunService.RenderStepped:Connect(function(dt)
-    fadeOut = fadeOut + dt * 2
-    bg.Transparency = fadeOut
-    containerGlow.BackgroundTransparency = 0.2 + fadeOut * 0.8
-    containerInner.BackgroundTransparency = 0.15 + fadeOut * 0.85
-    containerStroke.Transparency = 0.5 + fadeOut * 0.5
-    topTitle.TextTransparency = fadeOut
-    versionLabel.TextTransparency = fadeOut
-    statusLabel.TextTransparency = fadeOut
-    
-    for i = 1, 12 do
-        outerGlows[i].Transparency = math.min(1, 0.8 + fadeOut)
-        midGlows[i].Transparency = math.min(1, 0.5 + fadeOut)
-        coreLines[i].Transparency = fadeOut
+    local popup = Instance.new("Frame")
+    popup.Size = UDim2.new(0, 400, 0, 240)
+    popup.Position = UDim2.new(0.5, -200, 1, 30)
+    popup.BackgroundColor3 = Color3.fromRGB(14, 14, 30)
+    popup.BackgroundTransparency = 0.04
+    popup.BorderSizePixel = 0
+    popup.Parent = keyGui
+    Instance.new("UICorner", popup).CornerRadius = UDim.new(0, 20)
+
+    local ps1 = Instance.new("UIStroke")
+    ps1.Color = Color3.fromRGB(80, 140, 255); ps1.Thickness = 2; ps1.Transparency = 0.45; ps1.Parent = popup
+    local ps2 = Instance.new("UIStroke")
+    ps2.Color = Color3.fromRGB(150, 200, 255); ps2.Thickness = 1; ps2.Transparency = 0.25; ps2.Parent = popup
+
+    TweenService:Create(popup, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {Position = UDim2.new(0.5, -200, 0.5, -120)}):Play()
+
+    local keyTitle = Instance.new("TextLabel")
+    keyTitle.Size = UDim2.new(1,0,0,45); keyTitle.Text = "输入密钥"
+    keyTitle.TextColor3 = Color3.new(1,1,1); keyTitle.TextSize = 24
+    keyTitle.Font = Enum.Font.GothamBlack; keyTitle.BackgroundTransparency = 1; keyTitle.Parent = popup
+
+    local inputFrame = Instance.new("Frame")
+    inputFrame.Size = UDim2.new(0, 320, 0, 48); inputFrame.Position = UDim2.new(0.5, -160, 0, 70)
+    inputFrame.BackgroundColor3 = Color3.fromRGB(20,20,38); inputFrame.BorderSizePixel = 0; inputFrame.Parent = popup
+    Instance.new("UICorner", inputFrame).CornerRadius = UDim.new(0,12)
+    local is = Instance.new("UIStroke")
+    is.Color = Color3.fromRGB(70, 130, 240); is.Thickness = 1; is.Transparency = 0.5; is.Parent = inputFrame
+
+    local input = Instance.new("TextBox")
+    input.Size = UDim2.new(1,-20,1,0); input.Position = UDim2.new(0,10,0,0)
+    input.PlaceholderText = "ENTER YOUR KEY HERE"; input.Text = ""
+    input.TextColor3 = Color3.new(1,1,1); input.PlaceholderColor3 = Color3.fromRGB(130,140,190)
+    input.BackgroundTransparency = 1; input.Font = Enum.Font.GothamMedium; input.TextSize = 15; input.Parent = inputFrame
+
+    local errorLabel = Instance.new("TextLabel")
+    errorLabel.Size = UDim2.new(1,0,0,20); errorLabel.Position = UDim2.new(0,0,0,130)
+    errorLabel.BackgroundTransparency = 1; errorLabel.Text = ""
+    errorLabel.TextColor3 = Color3.fromRGB(255,100,100); errorLabel.TextSize = 12
+    errorLabel.Font = Enum.Font.GothamMedium; errorLabel.Parent = popup
+
+    local confirm = Instance.new("TextButton")
+    confirm.Size = UDim2.new(0, 150, 0, 44); confirm.Position = UDim2.new(0.5, -75, 1, -60)
+    confirm.BackgroundColor3 = Color3.fromRGB(50, 110, 230); confirm.Text = "VERIFY KEY"
+    confirm.TextColor3 = Color3.new(1,1,1); confirm.Font = Enum.Font.GothamBold; confirm.TextSize = 14
+    confirm.BorderSizePixel = 0; confirm.Parent = popup
+    Instance.new("UICorner", confirm).CornerRadius = UDim.new(0,12)
+    local cs = Instance.new("UIStroke")
+    cs.Color = Color3.fromRGB(130, 180, 255); cs.Thickness = 1.5; cs.Transparency = 0.3; cs.Parent = confirm
+
+    local function submit()
+        local key = input.Text
+        if key == "" then errorLabel.Text = "PLEASE ENTER A KEY"; return end
+        confirm.Text = "VERIFYING..."; confirm.BackgroundColor3 = Color3.fromRGB(80,80,80)
+        local success, data = pcall(function() return game:HttpGet("https://raw.githubusercontent.com/youneili01-droid/qiuyu-script/main/keys.txt") end)
+        if success and data and data:find(key) then
+            TweenService:Create(popup, TweenInfo.new(0.5, Enum.EasingStyle.Back), {Position = UDim2.new(0.5, -200, -1, 0)}):Play()
+            task.wait(0.6); keyGui:Destroy()
+            if callback then callback(true) end
+        else
+            errorLabel.Text = "INVALID KEY"; input.Text = ""
+            confirm.Text = "VERIFY KEY"; confirm.BackgroundColor3 = Color3.fromRGB(50, 110, 230)
+        end
     end
-    for _, dot in ipairs(vertexDots) do dot.Transparency = fadeOut end
-    for _, p in ipairs(bgParticles) do p.dot.Transparency = math.min(1, p.dot.Transparency + dt * 2) end
-    
-    if fadeOut >= 1 then
-        fadeConn:Disconnect()
-        bg:Remove()
-        for i = 1, 12 do outerGlows[i]:Remove(); midGlows[i]:Remove(); coreLines[i]:Remove() end
-        for _, dot in ipairs(vertexDots) do dot:Remove() end
-        for _, p in ipairs(bgParticles) do p.dot:Remove() end
-        container:Destroy()
-        UserInputService.MouseBehavior = Enum.MouseBehavior.Default
-    end
+    confirm.MouseButton1Click:Connect(submit)
+    input.FocusLost:Connect(function(ep) if ep then submit() end end)
+end
+
+task.spawn(function()
+    repeat task.wait() until phase == 3
+    task.wait(0.6)
+    ShowPremiumKeyWindow(function() print("✅ 验证成功!") end)
 end)
 
-print("3D霓虹正方体 + 圆角容器 - 完成!")
+print("🌈 Rainbow Island - 调整版就绪")
