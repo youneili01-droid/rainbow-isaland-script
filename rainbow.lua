@@ -166,7 +166,7 @@ local function createPanel(side)
 
         local title = Instance.new("TextLabel")
         title.Size = UDim2.new(1, -20, 1, 0); title.Position = UDim2.new(0, 10, 0, 0); title.BackgroundTransparency = 1
-        title.Text = (side == "left") and "👥 玩家列表" or "⚙️ 功能控制"
+        title.Text = (side == "left") and " 玩家列表" or " 功能控制"
         title.TextColor3 = Color3.fromRGB(200, 220, 255); title.TextSize = 14; title.Font = Enum.Font.GothamBold
         title.TextXAlignment = Enum.TextXAlignment.Left; title.Parent = topBar
 
