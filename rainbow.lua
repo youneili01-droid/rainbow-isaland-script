@@ -1,177 +1,158 @@
 -- ============================================
--- 3D霓虹正方体 - Roblox预加载画面
+-- 3D霓虹发光正方体 - 精简版（无线条端点）
 -- ============================================
 
 local RunService = game:GetService("RunService")
-local TweenService = game:GetService("TweenService")
 local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
 local LocalPlayer = Players.LocalPlayer
+local Camera = workspace.CurrentCamera
 
+-- 正方体参数（缩小）
+local cubeSize = 2
+local halfSize = cubeSize / 2
+
+-- 8个顶点
+local vertices = {
+    Vector3.new(-halfSize, -halfSize, -halfSize),
+    Vector3.new( halfSize, -halfSize, -halfSize),
+    Vector3.new( halfSize,  halfSize, -halfSize),
+    Vector3.new(-halfSize,  halfSize, -halfSize),
+    Vector3.new(-halfSize, -halfSize,  halfSize),
+    Vector3.new( halfSize, -halfSize,  halfSize),
+    Vector3.new( halfSize,  halfSize,  halfSize),
+    Vector3.new(-halfSize,  halfSize,  halfSize),
+}
+
+-- 12条边
+local edges = {
+    {1, 2}, {2, 3}, {3, 4}, {4, 1},
+    {5, 6}, {6, 7}, {7, 8}, {8, 5},
+    {1, 5}, {2, 6}, {3, 7}, {4, 8},
+}
+
+-- 只创建12条棱（无顶点球）
+local edgeParts = {}
+for _, edge in ipairs(edges) do
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(0.05, 0.05, 1)
+    part.Anchored = true
+    part.CanCollide = false
+    part.Material = Enum.Material.Neon
+    part.Color = Color3.fromRGB(255, 0, 0)
+    part.Parent = workspace
+    table.insert(edgeParts, part)
+end
+
+-- 相机
+Camera.CameraType = Enum.CameraType.Scriptable
+Camera.CFrame = CFrame.new(Vector3.new(0, 0, 7), Vector3.new(0, 0, 0))
+Camera.FieldOfView = 40
+
+-- UI
 local SplashScreen = Instance.new("ScreenGui")
-SplashScreen.Name = "NeonSplash"
+SplashScreen.Name = "Splash"
 SplashScreen.Parent = LocalPlayer:WaitForChild("PlayerGui")
 SplashScreen.ResetOnSpawn = false
 SplashScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 SplashScreen.DisplayOrder = 999
+SplashScreen.IgnoreGuiInset = true
 
--- 背景
-local bg = Instance.new("Frame")
-bg.Size = UDim2.new(1, 0, 1, 0)
-bg.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
-bg.BorderSizePixel = 0
-bg.Parent = SplashScreen
+local titleLabel = Instance.new("TextLabel")
+titleLabel.Size = UDim2.new(1, 0, 0, 36)
+titleLabel.Position = UDim2.new(0, 0, 0.75, 0)
+titleLabel.BackgroundTransparency = 1
+titleLabel.Text = "新项目"
+titleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
+titleLabel.TextSize = 26
+titleLabel.Font = Enum.Font.GothamBlack
+titleLabel.TextStrokeTransparency = 0.3
+titleLabel.TextStrokeColor3 = Color3.fromRGB(100, 150, 255)
+titleLabel.ZIndex = 10
+titleLabel.Parent = SplashScreen
 
--- 3D正方体用ViewportFrame
-local viewport = Instance.new("ViewportFrame")
-viewport.Size = UDim2.new(0, 300, 0, 300)
-viewport.Position = UDim2.new(0.5, -150, 0.4, -150)
-viewport.BackgroundTransparency = 1
-viewport.BorderSizePixel = 0
-viewport.Parent = SplashScreen
-
--- 正方体模型
-local cubeModel = Instance.new("Model")
-cubeModel.Name = "NeonCube"
-cubeModel.Parent = viewport
-
--- 12条边用细Part
-local edgeParts = {}
-local edges = {
-    {0,1},{1,2},{2,3},{3,0},
-    {4,5},{5,6},{6,7},{7,4},
-    {0,4},{1,5},{2,6},{3,7}
-}
-local verts = {
-    Vector3.new(-2, -2, -2), Vector3.new(2, -2, -2),
-    Vector3.new(2, 2, -2),   Vector3.new(-2, 2, -2),
-    Vector3.new(-2, -2, 2),  Vector3.new(2, -2, 2),
-    Vector3.new(2, 2, 2),    Vector3.new(-2, 2, 2)
-}
-
-for _, edge in ipairs(edges) do
-    local p1 = verts[edge[1] + 1]
-    local p2 = verts[edge[2] + 1]
-    local mid = (p1 + p2) / 2
-    local length = (p2 - p1).Magnitude
-    local dir = (p2 - p1).Unit
-    
-    local part = Instance.new("Part")
-    part.Size = Vector3.new(0.12, 0.12, length)
-    part.CFrame = CFrame.new(mid, mid + dir)
-    part.Anchored = true
-    part.CanCollide = false
-    part.Material = Enum.Material.Neon
-    part.BrickColor = BrickColor.new("Really blue")
-    part.Parent = cubeModel
-    
-    -- 发光
-    local glow = Instance.new("PointLight")
-    glow.Brightness = 0.5
-    glow.Range = 4
-    glow.Color = Color3.fromRGB(100, 150, 255)
-    glow.Parent = part
-    
-    table.insert(edgeParts, {part = part, glow = glow})
-end
-
--- 顶点球体
-for _, v in ipairs(verts) do
-    local sphere = Instance.new("Part")
-    sphere.Size = Vector3.new(0.3, 0.3, 0.3)
-    sphere.Shape = Enum.PartType.Ball
-    sphere.Position = v
-    sphere.Anchored = true
-    sphere.CanCollide = false
-    sphere.Material = Enum.Material.Neon
-    sphere.BrickColor = BrickColor.new("White")
-    sphere.Parent = cubeModel
-    
-    local glow = Instance.new("PointLight")
-    glow.Brightness = 1
-    glow.Range = 5
-    glow.Color = Color3.fromRGB(200, 200, 255)
-    glow.Parent = sphere
-end
-
--- 相机
-local cam = Instance.new("Camera")
-cam.Parent = viewport
-cam.CFrame = CFrame.new(Vector3.new(0, 0, 10), Vector3.new(0, 0, 0))
-viewport.CurrentCamera = cam
-
--- 标题
-local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 35)
-title.Position = UDim2.new(0, 0, 0.62, 0)
-title.BackgroundTransparency = 1
-title.Text = "新项目"
-title.TextColor3 = Color3.fromRGB(255, 255, 255)
-title.TextSize = 28
-title.Font = Enum.Font.GothamBlack
-title.TextStrokeTransparency = 0
-title.TextStrokeColor3 = Color3.fromRGB(50, 100, 255)
-title.Parent = SplashScreen
-
--- 加载条
-local loadBg = Instance.new("Frame")
-loadBg.Size = UDim2.new(0, 180, 0, 4)
-loadBg.Position = UDim2.new(0.5, -90, 0.7, 0)
-loadBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
-loadBg.BorderSizePixel = 0
-loadBg.Parent = SplashScreen
-Instance.new("UICorner", loadBg).CornerRadius = UDim.new(1, 0)
+local loadBarBg = Instance.new("Frame")
+loadBarBg.Size = UDim2.new(0, 180, 0, 3)
+loadBarBg.Position = UDim2.new(0.5, -90, 0.86, 0)
+loadBarBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+loadBarBg.BorderSizePixel = 0
+loadBarBg.ZIndex = 10
+loadBarBg.Parent = SplashScreen
+Instance.new("UICorner", loadBarBg).CornerRadius = UDim.new(1, 0)
 
 local loadBar = Instance.new("Frame")
 loadBar.Size = UDim2.new(0, 0, 1, 0)
-loadBar.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
+loadBar.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
 loadBar.BorderSizePixel = 0
-loadBar.Parent = loadBg
+loadBar.ZIndex = 10
+loadBar.Parent = loadBarBg
 Instance.new("UICorner", loadBar).CornerRadius = UDim.new(1, 0)
 
-local loadGlow = Instance.new("UIStroke")
-loadGlow.Color = Color3.fromRGB(150, 200, 255)
-loadGlow.Thickness = 1.5
-loadGlow.Transparency = 0.3
-loadGlow.Parent = loadBar
-
 -- 动画
-local totalTime = 0
 local hue = 0
-local progress = 0
+local angleX = 0
+local angleY = 0
+local loadProgress = 0
 
-local conn = RunService.RenderStepped:Connect(function(dt)
-    totalTime += dt
-    progress = math.min(progress + dt * 0.35, 1)
-    loadBar.Size = UDim2.new(progress, 0, 1, 0)
+local function rotateX(pos, angle)
+    local c, s = math.cos(angle), math.sin(angle)
+    return Vector3.new(pos.X, pos.Y * c - pos.Z * s, pos.Y * s + pos.Z * c)
+end
+
+local function rotateY(pos, angle)
+    local c, s = math.cos(angle), math.sin(angle)
+    return Vector3.new(pos.X * c + pos.Z * s, pos.Y, -pos.X * s + pos.Z * c)
+end
+
+local connection = RunService.RenderStepped:Connect(function(dt)
+    angleX = angleX + 0.015
+    angleY = angleY + 0.015 * 0.7
+    hue = (hue + 0.5) % 360
+    local col = Color3.fromHSV(hue / 360, 1, 1)
     
-    -- 旋转正方体
-    local rotY = totalTime * 1.5
-    local rotX = totalTime * 1.0
-    cubeModel:SetPrimaryPartCFrame(CFrame.new(0, 0, 0) * CFrame.Angles(rotX, rotY, 0))
+    loadProgress = math.min(loadProgress + dt * 0.3, 1)
+    loadBar.Size = UDim2.new(loadProgress, 0, 1, 0)
+    loadBar.BackgroundColor3 = col
+    titleLabel.TextStrokeColor3 = col
     
-    -- 彩虹色
-    hue = (hue + dt * 60) % 360
-    local r, g, b = Color3.fromHSV(hue / 360, 1, 1).R, Color3.fromHSV(hue / 360, 1, 1).G, Color3.fromHSV(hue / 360, 1, 1).B
-    
-    for _, data in ipairs(edgeParts) do
-        data.part.Color = Color3.fromRGB(r * 255, g * 255, b * 255)
-        data.glow.Color = Color3.fromRGB(r * 255, g * 255, b * 255)
+    -- 计算旋转后顶点
+    local rv = {}
+    local d = 3.5
+    for i, v in ipairs(vertices) do
+        local p = rotateX(v, angleX)
+        p = rotateY(p, angleY)
+        local per = d / (d - p.Z)
+        rv[i] = Vector3.new(p.X * per, p.Y * per, 0)
     end
     
-    -- 标题呼吸
-    title.TextTransparency = 0.1 + math.sin(totalTime * 1.5) * 0.1
-    loadGlow.Thickness = 1.5 + math.sin(totalTime * 4) * 0.8
+    -- 更新棱
+    for j, edge in ipairs(edges) do
+        local p1 = rv[edge[1]]
+        local p2 = rv[edge[2]]
+        local mid = (p1 + p2) / 2
+        local len = (p2 - p1).Magnitude
+        
+        edgeParts[j].Size = Vector3.new(0.05, 0.05, len)
+        edgeParts[j].CFrame = CFrame.new(mid, p2)
+        edgeParts[j].Color = col
+    end
+    
+    titleLabel.TextTransparency = 0.1 + math.sin(angleX * 2) * 0.1
 end)
 
--- 2.5秒后淡出
-task.wait(2.5)
-local fi = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
-TweenService:Create(bg, fi, {BackgroundTransparency = 1}):Play()
-TweenService:Create(title, fi, {TextTransparency = 1}):Play()
-TweenService:Create(loadBg, fi, {BackgroundTransparency = 1}):Play()
-TweenService:Create(loadBar, fi, {BackgroundTransparency = 1}):Play()
-task.wait(0.5)
-conn:Disconnect()
-SplashScreen:Destroy()
+task.wait(3)
+connection:Disconnect()
 
-print("3D霓虹正方体加载完成!")
+-- 淡出
+local ts = TweenService
+local fi = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+ts:Create(titleLabel, fi, {TextTransparency = 1}):Play()
+ts:Create(loadBarBg, fi, {BackgroundTransparency = 1}):Play()
+ts:Create(loadBar, fi, {BackgroundTransparency = 1}):Play()
+for _, p in ipairs(edgeParts) do ts:Create(p, fi, {Transparency = 1}):Play() end
+
+task.wait(0.5)
+for _, p in ipairs(edgeParts) do p:Destroy() end
+SplashScreen:Destroy()
+Camera.CameraType = Enum.CameraType.Custom
+print("3D霓虹正方体 完成!")
