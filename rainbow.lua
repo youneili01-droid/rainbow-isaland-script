@@ -1,121 +1,177 @@
--- 初始化参数
-local CoreGui = game:GetService("CoreGui")
+-- ============================================
+-- 3D霓虹正方体 - Roblox预加载画面
+-- ============================================
+
 local RunService = game:GetService("RunService")
-local Camera = workspace.CurrentCamera
+local TweenService = game:GetService("TweenService")
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
 
--- 1. 定义 3D 正方体的 8 个顶点坐标
-local vertices = {
-    {x = -1, y = -1, z = -1}, -- 1
-    {x =  1, y = -1, z = -1}, -- 2
-    {x =  1, y =  1, z = -1}, -- 3
-    {x = -1, y =  1, z = -1}, -- 4
-    {x = -1, y = -1, z =  1}, -- 5
-    {x =  1, y = -1, z =  1}, -- 6
-    {x =  1, y =  1, z =  1}, -- 7
-    {x = -1, y =  1, z =  1}  -- 8
-}
+local SplashScreen = Instance.new("ScreenGui")
+SplashScreen.Name = "NeonSplash"
+SplashScreen.Parent = LocalPlayer:WaitForChild("PlayerGui")
+SplashScreen.ResetOnSpawn = false
+SplashScreen.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+SplashScreen.DisplayOrder = 999
 
--- 2. 定义 12 条边（索引从 1 开始）
+-- 背景
+local bg = Instance.new("Frame")
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundColor3 = Color3.fromRGB(5, 5, 10)
+bg.BorderSizePixel = 0
+bg.Parent = SplashScreen
+
+-- 3D正方体用ViewportFrame
+local viewport = Instance.new("ViewportFrame")
+viewport.Size = UDim2.new(0, 300, 0, 300)
+viewport.Position = UDim2.new(0.5, -150, 0.4, -150)
+viewport.BackgroundTransparency = 1
+viewport.BorderSizePixel = 0
+viewport.Parent = SplashScreen
+
+-- 正方体模型
+local cubeModel = Instance.new("Model")
+cubeModel.Name = "NeonCube"
+cubeModel.Parent = viewport
+
+-- 12条边用细Part
+local edgeParts = {}
 local edges = {
-    {1, 2}, {2, 3}, {3, 4}, {4, 1},
-    {5, 6}, {6, 7}, {7, 8}, {8, 5},
-    {1, 5}, {2, 6}, {3, 7}, {4, 8}
+    {0,1},{1,2},{2,3},{3,0},
+    {4,5},{5,6},{6,7},{7,4},
+    {0,4},{1,5},{2,6},{3,7}
+}
+local verts = {
+    Vector3.new(-2, -2, -2), Vector3.new(2, -2, -2),
+    Vector3.new(2, 2, -2),   Vector3.new(-2, 2, -2),
+    Vector3.new(-2, -2, 2),  Vector3.new(2, -2, 2),
+    Vector3.new(2, 2, 2),    Vector3.new(-2, 2, 2)
 }
 
--- 3. 创建 Drawing 2D 线条（每条边需要两层线来实现霓虹发光）
-local lines = {}
-for i = 1, #edges do
-    -- 外层粗线（用于模拟发光）
-    local glowLine = Drawing.new("Line")
-    glowLine.Thickness = 12
-    glowLine.Transparency = 0.25
-    glowLine.Visible = true
+for _, edge in ipairs(edges) do
+    local p1 = verts[edge[1] + 1]
+    local p2 = verts[edge[2] + 1]
+    local mid = (p1 + p2) / 2
+    local length = (p2 - p1).Magnitude
+    local dir = (p2 - p1).Unit
     
-    -- 内层细线（核心高亮）
-    local coreLine = Drawing.new("Line")
-    coreLine.Thickness = 3
-    coreLine.Transparency = 1
-    coreLine.Visible = true
+    local part = Instance.new("Part")
+    part.Size = Vector3.new(0.12, 0.12, length)
+    part.CFrame = CFrame.new(mid, mid + dir)
+    part.Anchored = true
+    part.CanCollide = false
+    part.Material = Enum.Material.Neon
+    part.BrickColor = BrickColor.new("Really blue")
+    part.Parent = cubeModel
     
-    table.insert(lines, {glow = glowLine, core = coreLine})
+    -- 发光
+    local glow = Instance.new("PointLight")
+    glow.Brightness = 0.5
+    glow.Range = 4
+    glow.Color = Color3.fromRGB(100, 150, 255)
+    glow.Parent = part
+    
+    table.insert(edgeParts, {part = part, glow = glow})
 end
 
--- 旋转控制变量
-local angleX = 0
-local angleY = 0
-local rotateSpeed = 0.015
+-- 顶点球体
+for _, v in ipairs(verts) do
+    local sphere = Instance.new("Part")
+    sphere.Size = Vector3.new(0.3, 0.3, 0.3)
+    sphere.Shape = Enum.PartType.Ball
+    sphere.Position = v
+    sphere.Anchored = true
+    sphere.CanCollide = false
+    sphere.Material = Enum.Material.Neon
+    sphere.BrickColor = BrickColor.new("White")
+    sphere.Parent = cubeModel
+    
+    local glow = Instance.new("PointLight")
+    glow.Brightness = 1
+    glow.Range = 5
+    glow.Color = Color3.fromRGB(200, 200, 255)
+    glow.Parent = sphere
+end
+
+-- 相机
+local cam = Instance.new("Camera")
+cam.Parent = viewport
+cam.CFrame = CFrame.new(Vector3.new(0, 0, 10), Vector3.new(0, 0, 0))
+viewport.CurrentCamera = cam
+
+-- 标题
+local title = Instance.new("TextLabel")
+title.Size = UDim2.new(1, 0, 0, 35)
+title.Position = UDim2.new(0, 0, 0.62, 0)
+title.BackgroundTransparency = 1
+title.Text = "新项目"
+title.TextColor3 = Color3.fromRGB(255, 255, 255)
+title.TextSize = 28
+title.Font = Enum.Font.GothamBlack
+title.TextStrokeTransparency = 0
+title.TextStrokeColor3 = Color3.fromRGB(50, 100, 255)
+title.Parent = SplashScreen
+
+-- 加载条
+local loadBg = Instance.new("Frame")
+loadBg.Size = UDim2.new(0, 180, 0, 4)
+loadBg.Position = UDim2.new(0.5, -90, 0.7, 0)
+loadBg.BackgroundColor3 = Color3.fromRGB(30, 30, 50)
+loadBg.BorderSizePixel = 0
+loadBg.Parent = SplashScreen
+Instance.new("UICorner", loadBg).CornerRadius = UDim.new(1, 0)
+
+local loadBar = Instance.new("Frame")
+loadBar.Size = UDim2.new(0, 0, 1, 0)
+loadBar.BackgroundColor3 = Color3.fromRGB(80, 150, 255)
+loadBar.BorderSizePixel = 0
+loadBar.Parent = loadBg
+Instance.new("UICorner", loadBar).CornerRadius = UDim.new(1, 0)
+
+local loadGlow = Instance.new("UIStroke")
+loadGlow.Color = Color3.fromRGB(150, 200, 255)
+loadGlow.Thickness = 1.5
+loadGlow.Transparency = 0.3
+loadGlow.Parent = loadBar
+
+-- 动画
+local totalTime = 0
 local hue = 0
-local rainbowSpeed = 0.002
+local progress = 0
 
--- 旋转矩阵函数
-local function rotateX(p, angle)
-    local cos, sin = Math.cos(angle), Math.sin(angle)
-    return {
-        x = p.x,
-        y = p.y * cos - p.z * sin,
-        z = p.y * sin + p.z * cos
-    }
-end
-
-local function rotateY(p, angle)
-    local cos, sin = Math.cos(angle), Math.sin(angle)
-    return {
-        x = p.x * cos + p.z * sin,
-        y = p.y,
-        z = -p.x * sin + p.z * cos
-    }
-end
-
--- 主渲染循环
-local connection
-connection = RunService.RenderStepped:Connect(function()
-    -- 安全退出检测：如果脚本创建的某条线被意外销毁则停止循环
-    if not lines[1] or not lines[1].core then 
-        connection:Disconnect() 
-        return 
+local conn = RunService.RenderStepped:Connect(function(dt)
+    totalTime += dt
+    progress = math.min(progress + dt * 0.35, 1)
+    loadBar.Size = UDim2.new(progress, 0, 1, 0)
+    
+    -- 旋转正方体
+    local rotY = totalTime * 1.5
+    local rotX = totalTime * 1.0
+    cubeModel:SetPrimaryPartCFrame(CFrame.new(0, 0, 0) * CFrame.Angles(rotX, rotY, 0))
+    
+    -- 彩虹色
+    hue = (hue + dt * 60) % 360
+    local r, g, b = Color3.fromHSV(hue / 360, 1, 1).R, Color3.fromHSV(hue / 360, 1, 1).G, Color3.fromHSV(hue / 360, 1, 1).B
+    
+    for _, data in ipairs(edgeParts) do
+        data.part.Color = Color3.fromRGB(r * 255, g * 255, b * 255)
+        data.glow.Color = Color3.fromRGB(r * 255, g * 255, b * 255)
     end
-
-    -- 更新旋转角度与颜色
-    angleX = angleX + rotateSpeed
-    angleY = angleY + rotateSpeed * 0.7
-    hue = (hue + rainbowSpeed) % 1
-    local color = Color3.fromHSV(hue, 1, 1)
-
-    -- 计算屏幕中心和缩放
-    local viewportSize = Camera.ViewportSize
-    local cx = viewportSize.X / 2
-    local cy = viewportSize.Y / 2
-    local scale = Math.min(viewportSize.X, viewportSize.Y) * 0.25
-
-    -- 计算 3D 到 2D 投影点
-    local screenPoints = {}
-    for i = 1, #vertices do
-        local p = rotateX(vertices[i], angleX)
-        p = rotateY(p, angleY)
-
-        local distance = 4
-        local perspective = distance / (distance - p.z)
-        
-        screenPoints[i] = Vector2.new(
-            cx + p.x * scale * perspective,
-            cy + p.y * scale * perspective
-        )
-    end
-
-    -- 更新所有线条的坐标与颜色
-    for i, edge in ipairs(edges) do
-        local p1 = screenPoints[edge[1]]
-        local p2 = screenPoints[edge[2]]
-        local element = lines[i]
-
-        -- 外层发光线
-        element.glow.From = p1
-        element.glow.To = p2
-        element.glow.Color = color
-
-        -- 内层核心线
-        element.core.From = p1
-        element.core.To = p2
-        element.core.Color = Color3.new(1, 1, 1) -- 白色核心能让霓虹质感更好
-    end
+    
+    -- 标题呼吸
+    title.TextTransparency = 0.1 + math.sin(totalTime * 1.5) * 0.1
+    loadGlow.Thickness = 1.5 + math.sin(totalTime * 4) * 0.8
 end)
+
+-- 2.5秒后淡出
+task.wait(2.5)
+local fi = TweenInfo.new(0.5, Enum.EasingStyle.Quad, Enum.EasingDirection.Out)
+TweenService:Create(bg, fi, {BackgroundTransparency = 1}):Play()
+TweenService:Create(title, fi, {TextTransparency = 1}):Play()
+TweenService:Create(loadBg, fi, {BackgroundTransparency = 1}):Play()
+TweenService:Create(loadBar, fi, {BackgroundTransparency = 1}):Play()
+task.wait(0.5)
+conn:Disconnect()
+SplashScreen:Destroy()
+
+print("3D霓虹正方体加载完成!")
